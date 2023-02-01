@@ -1,0 +1,22 @@
+{
+  "name": "@dlw/rpc",
+  "productName": "RPC",
+  "version": "0.1.0",
+  "author": {
+    "name": "David Luis Wiegandt",
+    "email": "wigandtd@hu-berlin.de"
+  },
+  "private": true,
+  "main": "./dist/Main.js",
+  "scripts": {
+    "start": "node .",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "typescript": "^4.9.5"
+  },
+  "devDependencies": {
+    "@tsconfig/node18-strictest": "^1.0.0",
+    "@types/node": "^18.11.18"
+  }
+}
