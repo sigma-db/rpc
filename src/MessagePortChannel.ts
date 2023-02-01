@@ -1,4 +1,4 @@
-import type { ClientInterface, ClientMethod, MethodType, ServerMethod } from "./Method";
+import type { ClientMethod, MethodType, ServerMethod } from "./Method";
 import { MessagePortReader } from "./MessagePortReader";
 import { MessagePortWriter } from "./MessagePortWriter";
 
@@ -30,13 +30,5 @@ export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> 
 
     public async write(message: W): Promise<void> {
         await this.outbox.write(message);
-    }
-
-    public get interface(): ClientInterface<R> {
-        return new Proxy<this & ClientInterface<R>>(this, {
-            get(target, p: R["method"]) {
-                return target[p];
-            }
-        });
     }
 }

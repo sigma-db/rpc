@@ -2,10 +2,10 @@ import { MessagePortChannel } from "./MessagePortChannel";
 
 type ConverterClientMethods =
     | { method: "stdio", ports: [stdout: MessagePort, stderr: MessagePort] }
-    | { method: "result", args: [boolean] };
+    | { method: "result", args: [success: boolean] };
 
 type ConverterServerMethods =
-    | { method: "run", args: [boolean] };
+    | { method: "run", args: [value: boolean] };
 
 function setupServer() {
     const { port1, port2 } = new MessageChannel();
@@ -26,10 +26,10 @@ const channel = MessagePortChannel.create<ConverterClientMethods, ConverterServe
 async function client(result: boolean) {
     await channel.write({ method: "run", args: [result] });
 
-    const [success] = await channel.interface.result();
+    const { args: [success] } = await channel.read("result");
     console.log(success);
 
-    const [success2] = await channel.interface.result();
+    const { args: [success2] } = await channel.read("result");
     console.log(success2);
 }
 
