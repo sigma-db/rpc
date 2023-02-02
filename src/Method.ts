@@ -19,6 +19,6 @@ export function assertMethod<T extends Method, M extends T["method"]>(value: T, 
     }
 }
 
-export type ClientInterface<T extends ClientMethod> = {
-    [P in T as P["method"]]: () => Promise<P extends { args: infer A } ? A : void>;
-}
+export type Interface<T> = {
+    [Method in keyof T]: T[Method] extends (...args: infer A) => void ? { method: Method, args: A } : never;
+}[Extract<keyof T, string>];

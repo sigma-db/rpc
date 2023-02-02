@@ -1,6 +1,5 @@
 {
-  "name": "@dlw/rpc",
-  "productName": "RPC",
+  "name": "@sigma-db/rpc",
   "version": "0.1.0",
   "author": {
     "name": "David Luis Wiegandt",
@@ -12,11 +11,8 @@
     "start": "node .",
     "build": "tsc"
   },
-  "dependencies": {
-    "typescript": "^4.9.5"
-  },
   "devDependencies": {
-    "@tsconfig/node18-strictest": "^1.0.0",
-    "@types/node": "^18.11.18"
+    "@types/node": "^18.11.18",
+    "typescript": "^5.0.0-beta"
   }
 }

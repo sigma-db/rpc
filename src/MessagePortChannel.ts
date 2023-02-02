@@ -1,4 +1,4 @@
-import type { ClientMethod, MethodType, ServerMethod } from "./Method";
+import { ClientMethod, Interface, MethodType, ServerMethod } from "./Method";
 import { MessagePortReader } from "./MessagePortReader";
 import { MessagePortWriter } from "./MessagePortWriter";
 
@@ -6,12 +6,17 @@ export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> 
     private readonly inbox: MessagePortReader<R>;
     private readonly outbox: MessagePortWriter<W>;
 
-    constructor(port: MessagePort) {
+    private constructor(port: MessagePort) {
         this.inbox = MessagePortReader.create(port);
         this.outbox = MessagePortWriter.create(port);
+        port.start();
     }
 
-    public static create<R extends ClientMethod, W extends ServerMethod>(port: MessagePort): MessagePortChannel<R, W> {
+    public static createClient<R, W>(port: MessagePort): MessagePortChannel<Interface<R>, Interface<W>> {
+        return new MessagePortChannel(port);
+    }
+
+    public static createServer<R, W>(port: MessagePort): MessagePortChannel<Interface<W>, Interface<R>> {
         return new MessagePortChannel(port);
     }
 
