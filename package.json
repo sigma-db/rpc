@@ -1,5 +1,4 @@
 {
-  "private": true,
   "name": "@sigma-db/rpc",
   "version": "0.1.0",
   "description": "A simple Streams API-based RPC library for communicating via MessagePorts.",
@@ -10,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dlw93/tiny-rpc.git"
+    "url": "https://github.com/sigma-db/rpc.git"
   },
   "license": "MIT",
   "engines": {
@@ -21,10 +20,10 @@
     "typescript": "^5.0.0-beta"
   },
   "scripts": {
-    "start": "node .",
+    "start": "node ./dist/example/main.js",
     "build": "tsc",
     "prepare": "npm run build"
   },
-  "main": "./dist/Main.js",
-  "types": "./types/Main.d.ts"
+  "main": "./dist/src/index.js",
+  "types": "./types/src/index.d.ts"
 }

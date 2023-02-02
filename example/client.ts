@@ -1,4 +1,4 @@
-import { MessagePortChannel } from "../message-port-channel";
+import { MessagePortChannel } from "../src";
 import { ClientInterface, ServerInterface } from "./interface";
 
 export async function startClient(port: MessagePort) {
