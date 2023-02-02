@@ -1,4 +1,4 @@
-import { assertMethod, ClientMethod, MethodType } from "./Method";
+import { assertMethod, ClientMethod, MethodType } from "./method";
 
 export class MessagePortReadableStream<T> extends ReadableStream<MessageEvent<T>> {
     constructor(port: MessagePort) {
