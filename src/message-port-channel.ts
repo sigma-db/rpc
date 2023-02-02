@@ -1,6 +1,6 @@
-import { ClientMethod, Interface, MethodType, ServerMethod } from "./Method";
-import { MessagePortReader } from "./MessagePortReader";
-import { MessagePortWriter } from "./MessagePortWriter";
+import { ClientMethod, Interface, MethodType, ServerMethod } from "./method";
+import { MessagePortReader } from "./message-port-reader";
+import { MessagePortWriter } from "./message-port-writer";
 
 export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> {
     private readonly inbox: MessagePortReader<R>;

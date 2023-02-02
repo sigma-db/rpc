@@ -1,4 +1,4 @@
-import { ServerMethod } from "./Method";
+import { ServerMethod } from "./method";
 
 interface Message<T = any> {
     data: {

@@ -1,5 +1,5 @@
-import { MessagePortChannel } from "../MessagePortChannel";
-import { ClientInterface, ServerInterface } from "./Interface";
+import { MessagePortChannel } from "../message-port-channel";
+import { ClientInterface, ServerInterface } from "./interface";
 
 export async function startClient(port: MessagePort) {
     const channel = MessagePortChannel.createClient<ClientInterface, ServerInterface>(port);

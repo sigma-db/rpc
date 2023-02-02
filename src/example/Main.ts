@@ -1,5 +1,5 @@
-import { startClient } from "./Client";
-import { startServer } from "./Server";
+import { startClient } from "./client";
+import { startServer } from "./server";
 
 const { port1, port2 } = new MessageChannel();
 
