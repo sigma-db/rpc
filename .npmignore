@@ -1,8 +1,6 @@
 .vscode/
-dist/example/
-types/example/
 example/
 src/
 
 package-lock.json
-tsconfig.json
+tsconfig*.json

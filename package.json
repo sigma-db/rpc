@@ -22,8 +22,8 @@
   "scripts": {
     "start": "node ./dist/example/main.js",
     "build": "tsc",
-    "prepare": "npm run build"
+    "prepack": "tsc --build --clean && tsc -p tsconfig.production.json"
   },
-  "main": "./dist/src/index.js",
-  "types": "./types/src/index.d.ts"
+  "main": "./dist/index.js",
+  "types": "./types/index.d.ts"
 }

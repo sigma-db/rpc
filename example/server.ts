@@ -2,11 +2,11 @@ import { MessagePortChannel } from "../src";
 import { ClientInterface, ServerInterface } from "./interface";
 
 export async function startServer(port: MessagePort) {
-    const channel = MessagePortChannel.createServer<ClientInterface, ServerInterface>(port);
+    const { self, client } = MessagePortChannel.forServer<ClientInterface, ServerInterface>(port);
 
-    const { args: [value1] } = await channel.read("run");
-    channel.write({ method: "result", args: [value1 ? "success" : "failure"] });
+    const value1 = await self.run();
+    client.result(value1 ? "success" : "failure");
 
-    const { args: [value2] } = await channel.read("run");
-    channel.write({ method: "result", args: [value2 ? "success" : "failure"] });
+    const value2 = await self.run();
+    client.result(value2 ? "success" : "failure");
 }

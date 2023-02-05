@@ -1,12 +1,4 @@
-import { ServerMethod } from "./method";
-
-interface Message<T = any> {
-    data: {
-        method: string;
-        args?: T;
-    };
-    transfer: Transferable[];
-}
+import { Message, ServerMethod } from "./method";
 
 export class MessagePortWritableStream<T extends ServerMethod> extends WritableStream<Message<T>> {
     constructor(port: MessagePort) {
