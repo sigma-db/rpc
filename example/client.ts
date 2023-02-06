@@ -1,14 +1,14 @@
-import { MessagePortChannel } from "../src";
-import { ClientInterface, ServerInterface } from "./interface";
+import { Channel } from "../src";
+import { Client, Server } from "./interface";
 
 export async function startClient(port: MessagePort) {
-    const { self, server } = MessagePortChannel.forClient<ClientInterface, ServerInterface>(port);
+    const { event, remote } = Channel.create<Client, Server>(port);
 
-    server.run(false);
-    const result1 = await self.result();
-    console.log(result1);
+    let words = ["Reliefpfeiler", "Insomnia"];
 
-    server.run(true);
-    const result2 = await self.result();
-    console.log(result2);
+    for (const word of words) {
+        remote.checkPalindrome(word);
+        const [result] = await event.result();
+        console.log(`"${word}" ${result ? "is" : "isn't"} a palindrome.`);
+    }
 }

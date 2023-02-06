@@ -1,7 +1,7 @@
-export interface ClientInterface {
-    result(value: string): void;
+export interface Client {
+    result(value: boolean): Promise<void>;
 }
 
-export interface ServerInterface {
-    run(value: boolean): void;
+export interface Server {
+    checkPalindrome(value: string): Promise<void>;
 }

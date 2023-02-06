@@ -1,12 +1,15 @@
-import { MessagePortChannel } from "../src";
-import { ClientInterface, ServerInterface } from "./interface";
+import { Channel } from "../src";
+import { Client, Server } from "./interface";
 
 export async function startServer(port: MessagePort) {
-    const { self, client } = MessagePortChannel.forServer<ClientInterface, ServerInterface>(port);
+    const { event: self, remote } = Channel.create<Server, Client>(port);
 
-    const value1 = await self.run();
-    client.result(value1 ? "success" : "failure");
+    while (true) {
+        const [word] = await self.checkPalindrome();
 
-    const value2 = await self.run();
-    client.result(value2 ? "success" : "failure");
+        const forwards = word.toLowerCase();
+        const backwards = [...forwards].reverse().join("");
+
+        remote.result(forwards === backwards);
+    }
 }
