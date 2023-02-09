@@ -17,8 +17,6 @@ export interface ClientMethod<T = any> extends Method<T> {
 
 export type ExtractMethod<T extends Method, M extends T[Tag]> = Extract<T, { readonly [TAG]: M }>;
 
-export type ExtractMethod2<T extends Method, M extends T[Tag]> = [M, Omit<ExtractMethod<T, M>, Tag>];
-
 export function assertTag<T extends Method, M extends T[Tag]>(value: T, tag?: M): asserts value is ExtractMethod<T, M> {
     if (typeof tag !== "undefined" && value[TAG] !== tag) {
         throw new Error(`Method mismatch: Expected ${tag} but got ${value[TAG]}.`);
