@@ -2,6 +2,11 @@
   "name": "@sigma-db/rpc",
   "version": "0.2.0",
   "description": "A simple Streams API-based RPC library for communicating via MessagePorts.",
+  "keywords": [
+    "streams",
+    "message passing",
+    "async"
+  ],
   "author": {
     "name": "David Luis Wiegandt",
     "email": "wigandtd@hu-berlin.de",
@@ -16,7 +21,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18",
+    "@types/node": "^18.13.0",
     "typescript": "^5.0.0-beta"
   },
   "scripts": {
