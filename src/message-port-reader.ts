@@ -1,4 +1,4 @@
-import { assertMethod, ClientMethod, ExtractMethod, MethodName } from "./method";
+import { assertTag, ClientMethod, ExtractMethod, Tag } from "./method";
 
 export class MessagePortReadableStream<T> extends ReadableStream<MessageEvent<T>> {
     constructor(port: MessagePort) {
@@ -22,16 +22,16 @@ export class MessagePortReader<T extends ClientMethod> extends ReadableStreamDef
         return new MessagePortReader(stream);
     }
 
-    public override async read<M extends T[MethodName]>(method?: M): Promise<ReadableStreamReadResult<ExtractMethod<T, M>>> {
+    public override async read<U extends T[Tag]>(tag?: U): Promise<ReadableStreamReadResult<ExtractMethod<T, U>>> {
         const { done, value } = await super.read();
         if (done) {
             return { done };
         }
-        assertMethod(value, method);
+        assertTag(value, tag);
         return { done, value };
     }
 
-    public override async *[Symbol.asyncIterator](): AsyncIterableIterator<T> {
+    public override async *[Symbol.asyncIterator]() {
         while (true) {
             const { value, done } = await this.read();
             if (done) {

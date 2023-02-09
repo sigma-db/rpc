@@ -1,4 +1,4 @@
-import { Message, ServerMethod } from "./method";
+import { ExtractMethod, Message, ServerMethod, Tag } from "./method";
 
 export class MessagePortWritableStream<T extends ServerMethod> extends WritableStream<Message<T>> {
     constructor(port: MessagePort) {
@@ -21,7 +21,7 @@ export class MessagePortWriter<T extends ServerMethod> extends WritableStreamDef
         return new MessagePortWriter(writable);
     }
 
-    public override async write(message: T): Promise<void> {
+    public override async write<U extends T[Tag]>(message: ExtractMethod<T, U>): Promise<void> {
         await super.write(message);
     }
 }

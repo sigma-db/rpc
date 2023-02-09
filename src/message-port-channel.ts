@@ -1,4 +1,4 @@
-import { ClientMethod, ExtractMethod, ServerMethod, MethodName } from "./method";
+import { ClientMethod, ExtractMethod, ServerMethod, Tag } from "./method";
 import { MessagePortReader } from "./message-port-reader";
 import { MessagePortWriter } from "./message-port-writer";
 
@@ -12,10 +12,10 @@ export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> 
         port.start();
     }
 
-    public async receive<M extends R[MethodName]>(method: M, throwIfDone?: true): Promise<ExtractMethod<R, M>>
-    public async receive<M extends R[MethodName]>(method: M, throwIfDone?: false): Promise<ExtractMethod<R, M> | undefined>
-    public async receive<M extends R[MethodName]>(method: M, throwIfDone = true): Promise<ExtractMethod<R, M> | undefined> {
-        const { done, value } = await this.inbox.read(method);
+    public async receive<M extends R[Tag]>(tag: M, throwIfDone?: true): Promise<ExtractMethod<R, M>>
+    public async receive<M extends R[Tag]>(tag: M, throwIfDone?: false): Promise<ExtractMethod<R, M> | undefined>
+    public async receive<M extends R[Tag]>(tag: M, throwIfDone = true): Promise<ExtractMethod<R, M> | undefined> {
+        const { done, value } = await this.inbox.read(tag);
         if (!done) {
             return value;
         }
@@ -25,7 +25,25 @@ export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> 
         return undefined;
     }
 
-    public async send(message: W): Promise<void> {
-        await this.outbox.write(message);
+    public async send<M extends W[Tag]>(tag: M, message: Omit<ExtractMethod<W, M>, Tag>): Promise<void> {
+        const _message = { "@rpc": tag, ...message } as ExtractMethod<W, M>;    // cf. comment in method.ts :(
+        await this.outbox.write<M>(_message);
+    }
+
+    public receiveAll<M extends R[Tag]>(tag: M): AsyncIterable<ExtractMethod<R, M>> {
+        return {
+            [Symbol.asyncIterator]: () => {
+                return {
+                    next: async () => {
+                        const { done, value } = await this.inbox.read(tag);
+                        if (!done) {
+                            return { done, value };
+                        } else {
+                            return { done, value: undefined };
+                        }
+                    },
+                };
+            },
+        };
     }
 }

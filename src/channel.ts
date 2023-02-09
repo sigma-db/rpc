@@ -1,11 +1,11 @@
 import { MessagePortChannel } from "./message-port-channel";
-import { ExtractMethod, MethodName } from "./method";
+import { ExtractMethod, Tag } from "./method";
 
 type Invert<T> =
     T extends (...args: infer A) => Promise<infer R> ? R extends void ? () => Promise<A> : (args: R) => Promise<A> : never;
 
 type EventHandler<T> = {
-    [Method in keyof T & string]: Invert<T[Method]>;
+    [Method in keyof T & string as Method | `on${Capitalize<Method>}`]: Invert<T[Method]>;
 };
 
 type Interface<T> = {
@@ -25,17 +25,17 @@ export class Channel<R, W> {
         const channel = new MessagePortChannel<Interface<R>, Interface<W>>(port);
 
         const event = new Proxy({} as EventHandler<R>, {
-            get<M extends Interface<R>[MethodName]>(_target: any, method: M) {
+            get<M extends Interface<R>[Tag]>(_target: any, tag: M) {
                 return async (): Promise<ExtractMethod<Interface<R>, M>["args"]> => {
-                    return await channel.receive(method).then(({ args }) => args);
+                    return await channel.receive(tag).then(({ args }) => args);
                 };
             },
         });
 
         const remote = new Proxy({} as W, {
-            get<M extends Interface<W>[MethodName]>(_target: any, method: M) {
-                return async (...args: ExtractMethod<Interface<W>, M>["args"]) => {
-                    await channel.send({ "@rpc": method, args } as any);
+            get<M extends Interface<W>[Tag]>(_target: any, tag: M) {
+                return async (message: Omit<ExtractMethod<Interface<W>, M>, Tag>) => {
+                    await channel.send(tag, message);
                 };
             },
         });

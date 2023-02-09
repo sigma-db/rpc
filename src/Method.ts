@@ -1,12 +1,9 @@
-const methodName = "@rpc";
+const TAG = "@rpc"; // this constant's value should not occur *anywhere* outside this file
 
-export type MethodName = typeof methodName;
+export type Tag = typeof TAG;
 
-interface MethodBase<Name extends string> {
-    readonly [methodName]: Name;
-}
-
-export interface Method<T = any> extends MethodBase<string> {
+export interface Method<T = any> {
+    readonly [TAG]: string;
     readonly args?: T;
 }
 
@@ -18,11 +15,13 @@ export interface ClientMethod<T = any> extends Method<T> {
     readonly ports?: readonly MessagePort[];
 }
 
-export type ExtractMethod<T extends Method, M extends T[MethodName]> = Extract<T, MethodBase<M>>;
+export type ExtractMethod<T extends Method, M extends T[Tag]> = Extract<T, { readonly [TAG]: M }>;
 
-export function assertMethod<T extends Method, M extends T[MethodName]>(value: T, method?: M): asserts value is ExtractMethod<T, M> {
-    if (typeof method !== "undefined" && value[methodName] !== method) {
-        throw new Error(`Method mismatch: Expected ${method} but got ${value[methodName]}.`);
+export type ExtractMethod2<T extends Method, M extends T[Tag]> = [M, Omit<ExtractMethod<T, M>, Tag>];
+
+export function assertTag<T extends Method, M extends T[Tag]>(value: T, tag?: M): asserts value is ExtractMethod<T, M> {
+    if (typeof tag !== "undefined" && value[TAG] !== tag) {
+        throw new Error(`Method mismatch: Expected ${tag} but got ${value[TAG]}.`);
     }
 }
 
