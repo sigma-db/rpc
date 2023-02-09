@@ -1,4 +1,4 @@
-const TAG = "@rpc"; // this constant's value should not occur *anywhere* outside this file
+const TAG = "tag"; // this constant's value should not occur *anywhere* outside this file
 
 export type Tag = typeof TAG;
 
@@ -19,10 +19,6 @@ export type ExtractMethod<T extends Method, M extends T[Tag]> = M extends never 
 
 export function hasTag<T extends Method<unknown>, M extends Array<T[Tag]>>(value: T, tags: M): value is ExtractMethod<T, M[number]> {
     return tags.length === 0 || tags.includes(value[TAG]);
-}
-
-export function getTag<T extends Method<unknown>>(message: T): T[Tag] {
-    return message[TAG];
 }
 
 export interface Message<T = any> {

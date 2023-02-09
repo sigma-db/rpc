@@ -2,7 +2,7 @@ import { MessagePortReader } from "./message-port-reader";
 import { MessagePortWriter } from "./message-port-writer";
 import { ClientMethod, ExtractMethod, ServerMethod, Tag } from "./method";
 
-export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> {
+export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> implements AsyncIterable<R> {
     private readonly inbox: MessagePortReader<R>;
     private readonly outbox: MessagePortWriter<W>;
 
@@ -27,7 +27,7 @@ export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> 
     }
 
     public async send<M extends W[Tag]>(tag: M, message: Omit<ExtractMethod<W, M>, Tag>): Promise<void> {
-        const _message = { "@rpc": tag, ...message } as ExtractMethod<W, M>;    // cf. comment in method.ts :(
+        const _message = { tag, ...message } as ExtractMethod<W, M>;    // cf. comment in method.ts :(
         await this.outbox.write(_message);
     }
 
@@ -45,14 +45,8 @@ export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> 
             }),
         };
     }
+
+    public async *[Symbol.asyncIterator](): AsyncIterableIterator<ExtractMethod<R, R[Tag]>> {
+        yield* this.receiveAll();
+    }
 }
-
-
-// type Test =
-//     | { "@rpc": "f", args: [number, string] }
-//     | { "@rpc": "g", args: boolean };
-
-// (async () => {
-//     const channel = new MessagePortChannel<Test, Test>(null);
-//     const result = await channel.receive(["g"]);
-// })();
