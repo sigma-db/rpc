@@ -1,6 +1,6 @@
 {
   "name": "@sigma-db/rpc",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A simple Streams API-based RPC library for communicating via MessagePorts.",
   "keywords": [
     "streams",
