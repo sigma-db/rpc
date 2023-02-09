@@ -1,6 +1,6 @@
-import { ClientMethod, ExtractMethod, ServerMethod, Tag } from "./method";
 import { MessagePortReader } from "./message-port-reader";
 import { MessagePortWriter } from "./message-port-writer";
+import { ClientMethod, ExtractMethod, ServerMethod, Tag } from "./method";
 
 export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> {
     private readonly inbox: MessagePortReader<R>;
@@ -12,10 +12,11 @@ export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> 
         port.start();
     }
 
-    public async receive<M extends R[Tag]>(tag: M, throwIfDone?: true): Promise<ExtractMethod<R, M>>
-    public async receive<M extends R[Tag]>(tag: M, throwIfDone?: false): Promise<ExtractMethod<R, M> | undefined>
-    public async receive<M extends R[Tag]>(tag: M, throwIfDone = true): Promise<ExtractMethod<R, M> | undefined> {
-        const { done, value } = await this.inbox.read(tag);
+    public async receive<M extends R[Tag]>(tags: M | M[], throwIfDone?: true): Promise<ExtractMethod<R, M>>
+    public async receive<M extends R[Tag]>(tags: M | M[], throwIfDone?: false): Promise<ExtractMethod<R, M> | undefined>
+    public async receive<M extends R[Tag]>(tags: M | M[], throwIfDone = true): Promise<ExtractMethod<R, M> | undefined> {
+        tags = (Array.isArray(tags) ? tags : [tags]);
+        const { done, value } = await this.inbox.read(...tags);
         if (!done) {
             return value;
         }
@@ -27,23 +28,31 @@ export class MessagePortChannel<R extends ClientMethod, W extends ServerMethod> 
 
     public async send<M extends W[Tag]>(tag: M, message: Omit<ExtractMethod<W, M>, Tag>): Promise<void> {
         const _message = { "@rpc": tag, ...message } as ExtractMethod<W, M>;    // cf. comment in method.ts :(
-        await this.outbox.write<M>(_message);
+        await this.outbox.write(_message);
     }
 
-    public receiveAll<M extends R[Tag]>(tag: M): AsyncIterable<ExtractMethod<R, M>> {
+    public receiveAll<M extends R[Tag]>(...tags: M[]): AsyncIterable<ExtractMethod<R, M>> {
         return {
-            [Symbol.asyncIterator]: () => {
-                return {
-                    next: async () => {
-                        const { done, value } = await this.inbox.read(tag);
-                        if (!done) {
-                            return { done, value };
-                        } else {
-                            return { done, value: undefined };
-                        }
-                    },
-                };
-            },
+            [Symbol.asyncIterator]: () => ({
+                next: async () => {
+                    const { done, value } = await this.inbox.read(...tags);
+                    if (!done) {
+                        return { done, value };
+                    } else {
+                        return { done, value: undefined };
+                    }
+                },
+            }),
         };
     }
 }
+
+
+// type Test =
+//     | { "@rpc": "f", args: [number, string] }
+//     | { "@rpc": "g", args: boolean };
+
+// (async () => {
+//     const channel = new MessagePortChannel<Test, Test>(null);
+//     const result = await channel.receive(["g"]);
+// })();

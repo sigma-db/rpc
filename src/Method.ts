@@ -15,15 +15,21 @@ export interface ClientMethod<T = any> extends Method<T> {
     readonly ports?: readonly MessagePort[];
 }
 
-export type ExtractMethod<T extends Method, M extends T[Tag]> = Extract<T, { readonly [TAG]: M }>;
+export type ExtractMethod<T extends Method, M extends T[Tag]> = M extends never ? T : Extract<T, { readonly [TAG]: M }>;
 
-export function assertTag<T extends Method, M extends T[Tag]>(value: T, tag?: M): asserts value is ExtractMethod<T, M> {
-    if (typeof tag !== "undefined" && value[TAG] !== tag) {
-        throw new Error(`Method mismatch: Expected ${tag} but got ${value[TAG]}.`);
-    }
+export function hasTag<T extends Method<unknown>, M extends Array<T[Tag]>>(value: T, tags: M): value is ExtractMethod<T, M[number]> {
+    return tags.length === 0 || tags.includes(value[TAG]);
+}
+
+export function getTag<T extends Method<unknown>>(message: T): T[Tag] {
+    return message[TAG];
 }
 
 export interface Message<T = any> {
     data: Method<T>;
     transfer: Transferable[];
 }
+
+export type Interface<T> = {
+    [M in keyof T]: T[M] extends (...args: infer A) => Promise<void> ? { [TAG]: M, args: A } : never;
+}[keyof T & string];

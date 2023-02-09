@@ -1,4 +1,4 @@
-import { assertTag, ClientMethod, ExtractMethod, Tag } from "./method";
+import { ClientMethod, ExtractMethod, Tag, getTag, hasTag } from "./method";
 
 export class MessagePortReadableStream<T> extends ReadableStream<MessageEvent<T>> {
     constructor(port: MessagePort) {
@@ -22,13 +22,15 @@ export class MessagePortReader<T extends ClientMethod> extends ReadableStreamDef
         return new MessagePortReader(stream);
     }
 
-    public override async read<U extends T[Tag]>(tag?: U): Promise<ReadableStreamReadResult<ExtractMethod<T, U>>> {
+    public override async read<U extends T[Tag]>(...tags: U[]): Promise<ReadableStreamReadResult<ExtractMethod<T, U>>> {
         const { done, value } = await super.read();
         if (done) {
             return { done };
         }
-        assertTag(value, tag);
-        return { done, value };
+        if (hasTag(value, [])) {
+            return { done, value };
+        }
+        throw new Error(`Tag mismatch: Expected ${tags.length === 1 && "one of"} ${tags.join(", ")}, but got ${getTag(value)}.`);
     }
 
     public override async *[Symbol.asyncIterator]() {

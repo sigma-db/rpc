@@ -1,16 +1,13 @@
 import { MessagePortChannel } from "./message-port-channel";
-import { ExtractMethod, Tag } from "./method";
+import { ExtractMethod, Interface, Tag } from "./method";
 
-type Invert<T> =
-    T extends (...args: infer A) => Promise<infer R> ? R extends void ? () => Promise<A> : (args: R) => Promise<A> : never;
+type Args<T> = T extends void ? [] : T extends unknown[] ? T : [arg: T];
+type Return<T extends unknown[]> = T extends [] ? void : T;
+type Inverse<T> = T extends (...args: infer A) => Promise<infer R> ? (...args: Args<R>) => Promise<Return<A>> : never;
 
 type EventHandler<T> = {
-    [Method in keyof T & string as Method | `on${Capitalize<Method>}`]: Invert<T[Method]>;
+    [Method in keyof T]: Inverse<T[Method]>;
 };
-
-type Interface<T> = {
-    [Method in keyof T & string]: T[Method] extends (...args: infer A) => unknown ? { "@rpc": Method, args: A } : never;
-}[keyof T & string];
 
 export class Channel<R, W> {
     readonly #event: R;
@@ -22,20 +19,23 @@ export class Channel<R, W> {
     }
 
     public static create<R extends object, W extends object>(port: MessagePort): Channel<EventHandler<R>, W> {
-        const channel = new MessagePortChannel<Interface<R>, Interface<W>>(port);
+        type _R = Interface<R>;
+        type _W = Interface<W>;
+
+        const channel = new MessagePortChannel<_R, _W>(port);
 
         const event = new Proxy({} as EventHandler<R>, {
-            get<M extends Interface<R>[Tag]>(_target: any, tag: M) {
-                return async (): Promise<ExtractMethod<Interface<R>, M>["args"]> => {
+            get<M extends _R[Tag]>(_target: any, tag: M) {
+                return async (): Promise<ExtractMethod<_R, M>["args"]> => {
                     return await channel.receive(tag).then(({ args }) => args);
                 };
             },
         });
 
         const remote = new Proxy({} as W, {
-            get<M extends Interface<W>[Tag]>(_target: any, tag: M) {
-                return async (message: Omit<ExtractMethod<Interface<W>, M>, Tag>) => {
-                    await channel.send(tag, message);
+            get<M extends _W[Tag]>(_target: any, tag: M) {
+                return async (...args: ExtractMethod<_W, M>["args"]) => {
+                    await channel.send(tag, { args } as Omit<ExtractMethod<_W, M>, Tag>);
                 };
             },
         });
